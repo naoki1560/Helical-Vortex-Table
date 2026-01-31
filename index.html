@@ -5,223 +5,187 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Helical Vortex Periodic Table</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #050505; color: #fff; font-family: "Helvetica Neue", Arial, sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #000; color: #fff; font-family: sans-serif; }
         
-        /* 情報表示エリア */
+        /* インターフェース */
         #info {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(0, 0, 0, 0.85); padding: 15px;
-            border-left: 4px solid #00ffff;
-            border-radius: 4px; pointer-events: none; z-index: 10;
-            max-width: 300px;
+            position: absolute; top: 0; left: 0; width: 100%;
+            pointer-events: none; z-index: 10; padding: 10px;
+            box-sizing: border-box;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
         }
-        h1 { margin: 0 0 5px 0; font-size: 18px; color: #00ffff; text-transform: uppercase; }
-        p { margin: 2px 0; font-size: 12px; color: #ddd; }
-        #selected-atom {
-            margin-top: 10px; padding-top: 5px; border-top: 1px solid #555;
-            font-size: 16px; font-weight: bold; color: #ff00ff; min-height: 20px;
-        }
-
-        /* 凡例 */
+        h1 { margin: 0; font-size: 16px; color: #00ffff; display: inline-block; margin-right: 15px; }
+        #status { font-size: 14px; color: #ff00ff; font-weight: bold; }
+        
+        /* 凡例（邪魔にならないよう下部に配置） */
         #legend {
-            position: absolute; top: 10px; right: 10px;
-            background: rgba(0, 0, 0, 0.85); padding: 10px;
-            border-radius: 4px; z-index: 10; font-size: 11px;
+            position: absolute; bottom: 10px; right: 10px;
+            background: rgba(0, 0, 0, 0.6); padding: 8px;
+            border-radius: 4px; pointer-events: none; font-size: 10px;
         }
-        .key-item { display: flex; align-items: center; margin-bottom: 3px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        .item { display: inline-block; margin-right: 10px; }
     </style>
 </head>
 <body>
     <div id="info">
-        <h1>Helical Vortex Table</h1>
-        <p>左クリック: 回転 | 右クリック: 移動 | ホイール: 拡大</p>
-        <p>球体をタップして詳細を表示</p>
-        <div id="selected-atom">Select an atom...</div>
+        <h1>Helical Vortex</h1>
+        <span id="status">Tap atom for details</span>
     </div>
 
     <div id="legend">
-        <div style="margin-bottom:5px; font-weight:bold; color:#ccc;">Orbitals</div>
-        <div class="key-item"><span class="dot" style="background:#ff4444;"></span>s-block</div>
-        <div class="key-item"><span class="dot" style="background:#ffff44;"></span>p-block</div>
-        <div class="key-item"><span class="dot" style="background:#4444ff;"></span>d-block</div>
-        <div class="key-item"><span class="dot" style="background:#44ff44;"></span>f-block</div>
-        <div class="key-item"><span class="dot" style="background:#ff00ff;"></span>Future</div>
+        <span class="item"><span class="dot" style="background:#ff4444;"></span>s</span>
+        <span class="item"><span class="dot" style="background:#ffff44;"></span>p</span>
+        <span class="item"><span class="dot" style="background:#4444ff;"></span>d</span>
+        <span class="item"><span class="dot" style="background:#44ff44;"></span>f</span>
+        <span class="item"><span class="dot" style="background:#ff00ff;"></span>Future</span>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
-        // 元素データ
-        const symbols = [
-            "", "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne",
-            "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca",
-            "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
-            "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr",
-            "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn",
-            "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd",
-            "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb",
-            "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg",
-            "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th",
-            "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm",
-            "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds",
-            "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"
-        ];
+        // 元素データ定義
+        const symbols = ["","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"];
         
-        const names = [
-            "", "Hydrogen", "Helium", "Lithium", "Beryllium", "Boron", "Carbon", "Nitrogen", "Oxygen", "Fluorine", "Neon",
-            "Sodium", "Magnesium", "Aluminium", "Silicon", "Phosphorus", "Sulfur", "Chlorine", "Argon", "Potassium", "Calcium",
-            "Scandium", "Titanium", "Vanadium", "Chromium", "Manganese", "Iron", "Cobalt", "Nickel", "Copper", "Zinc",
-            "Gallium", "Germanium", "Arsenic", "Selenium", "Bromine", "Krypton", "Rubidium", "Strontium", "Yttrium", "Zirconium",
-            "Niobium", "Molybdenum", "Technetium", "Ruthenium", "Rhodium", "Palladium", "Silver", "Cadmium", "Indium", "Tin",
-            "Antimony", "Tellurium", "Iodine", "Xenon", "Caesium", "Barium", "Lanthanum", "Cerium", "Praseodymium", "Neodymium",
-            "Promethium", "Samarium", "Europium", "Gadolinium", "Terbium", "Dysprosium", "Holmium", "Erbium", "Thulium", "Ytterbium",
-            "Lutetium", "Hafnium", "Tantalum", "Tungsten", "Rhenium", "Osmium", "Iridium", "Platinum", "Gold", "Mercury",
-            "Thallium", "Lead", "Bismuth", "Polonium", "Astatine", "Radon", "Francium", "Radium", "Actinium", "Thorium",
-            "Protactinium", "Uranium", "Neptunium", "Plutonium", "Americium", "Curium", "Berkelium", "Californium", "Einsteinium", "Fermium",
-            "Mendelevium", "Nobelium", "Lawrencium", "Rutherfordium", "Dubnium", "Seaborgium", "Bohrium", "Hassium", "Meitnerium", "Darmstadtium",
-            "Roentgenium", "Copernicium", "Nihonium", "Flerovium", "Moscovium", "Livermorium", "Tennessine", "Oganesson"
-        ];
-
-        // 3Dシーン設定
+        // 1. 基本セットアップ
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 50, 130);
-        
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.set(0, 0, 180); // 正面から全体が見える位置
+
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
-        
-        // ★改善点1：コントロールの自由化
+
+        // 2. 操作設定（キビキビ動く設定）
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.screenSpacePanning = true; // これで上下左右に平行移動できます（右クリック/2本指）
-        controls.autoRotate = false; // 操作しやすいよう自動回転はオフ（必要ならtrueに）
+        controls.enableDamping = true; 
+        controls.dampingFactor = 0.15; // 摩擦を減らしてキビキビさせる
+        controls.rotateSpeed = 1.5;    // 回転速度アップ
+        controls.panSpeed = 1.8;       // 平行移動速度アップ
+        controls.screenSpacePanning = true; // 上下左右に自由に動かせる
 
-        // ライト
-        scene.add(new THREE.AmbientLight(0x888888));
-        const pl = new THREE.PointLight(0xffffff, 1.2, 0);
-        pl.position.set(50, 100, 50);
-        scene.add(pl);
+        // 3. ライティング
+        scene.add(new THREE.AmbientLight(0xaaaaaa));
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(10, 50, 50);
+        scene.add(light);
 
-        // 文字スプライト作成関数
-        function makeTextSprite(message) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 128; canvas.height = 64;
-            ctx.font = "Bold 40px Arial";
-            ctx.fillStyle = "white"; 
-            ctx.textAlign = "center";
-            ctx.fillText(message, 64, 48);
-            const texture = new THREE.CanvasTexture(canvas);
-            const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false }); // depthTest:falseで常に手前に表示
-            const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.scale.set(4, 2, 1);
-            return sprite;
-        }
-
+        // 4. データ構築
         const elements = [];
         const colors = { s: 0xff4444, p: 0xffff44, d: 0x4444ff, f: 0x44ff44, future: 0xff00ff };
-        const clickableObjects = []; // クリック判定用リスト
+        const clickableObjects = [];
+        const spiralPoints = []; // 螺旋ライン用
 
-        // データ生成ループ
         for (let z = 1; z <= 126; z++) {
             let color = colors.d;
-            let type = "d-block";
-            if ([1,2,3,4,11,12,19,20,37,38,55,56,87,88,119,120].includes(z)) { color = colors.s; type="s-block"; }
-            else if ([5,6,7,8,9,10,13,14,15,16,17,18,31,32,33,34,35,36,49,50,51,52,53,54,81,82,83,84,85,86,113,114,115,116,117,118].includes(z)) { color = colors.p; type="p-block"; }
-            else if ((z >= 57 && z <= 71) || (z >= 89 && z <= 103)) { color = colors.f; type="f-block"; }
+            let type = "d";
+            if ([1,2,3,4,11,12,19,20,37,38,55,56,87,88,119,120].includes(z)) { color = colors.s; type="s"; }
+            else if ([5,6,7,8,9,10,13,14,15,16,17,18,31,32,33,34,35,36,49,50,51,52,53,54,81,82,83,84,85,86,113,114,115,116,117,118].includes(z)) { color = colors.p; type="p"; }
+            else if ((z >= 57 && z <= 71) || (z >= 89 && z <= 103)) { color = colors.f; type="f"; }
             else if (z > 118) { color = colors.future; type="Future"; }
 
-            elements.push({ z: z, color: color, type: type });
-        }
-
-        const geometry = new THREE.SphereGeometry(1.5, 16, 16);
-        const group = new THREE.Group();
-
-        elements.forEach(el => {
-            const maxR = 65;
-            const radius = maxR - (el.z * 0.4);
-            const theta = el.z * 0.5;
-            const y = -el.z * 1.0 + 60;
+            // 座標計算
+            const maxR = 60;
+            const radius = maxR - (z * 0.35);
+            const theta = z * 0.55; // 回転具合
+            const y = -z * 0.9 + 50; // 高さ調整
             const x = radius * Math.cos(theta);
             const z_pos = radius * Math.sin(theta);
 
-            // 球体
-            const mat = new THREE.MeshPhongMaterial({ color: el.color });
-            const atom = new THREE.Mesh(geometry, mat);
-            atom.position.set(x, y, z_pos);
-            atom.userData = { id: el.z, name: names[el.z] || "Unknown", type: el.type }; // 詳細データ
-            group.add(atom);
-            clickableObjects.push(atom); // クリック対象に追加
+            elements.push({ z: z, color: color, type: type, pos: new THREE.Vector3(x, y, z_pos) });
+            spiralPoints.push(new THREE.Vector3(x, y, z_pos));
+        }
 
-            // ★改善点2：文字ラベル（常に手前に表示される設定を追加）
-            const symbolStr = symbols[el.z] || String(el.z);
-            const label = makeTextSprite(symbolStr);
-            label.position.set(x, y + 2.5, z_pos);
-            label.renderOrder = 999; // 描画順を最優先に
-            group.add(label);
+        // 5. 描画
+        const atomGeo = new THREE.SphereGeometry(1.5, 12, 12);
+        const group = new THREE.Group();
+
+        // 5-1. 文字スプライト作成（サイズ固定ロジック）
+        function makeLabel(text) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 64; canvas.height = 64;
+            ctx.fillStyle = "white";
+            ctx.font = "bold 48px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(text, 32, 32);
             
-            // ガイド線
-            const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, y, z_pos), new THREE.Vector3(0, y, 0)]);
-            scene.add(new THREE.Line(lineGeo, new THREE.LineBasicMaterial({color:0x333333, opacity:0.3, transparent:true})));
+            const texture = new THREE.CanvasTexture(canvas);
+            const mat = new THREE.SpriteMaterial({ 
+                map: texture, 
+                sizeAttenuation: false, // ★ここが重要：距離に関係なく一定サイズ
+                depthTest: false        // 常に手前に表示
+            });
+            const sprite = new THREE.Sprite(mat);
+            // 画面上のサイズ調整（0.03くらいが適正）
+            sprite.scale.set(0.025, 0.025, 1); 
+            return sprite;
+        }
+
+        elements.forEach(el => {
+            // 原子
+            const mat = new THREE.MeshPhongMaterial({ color: el.color });
+            const atom = new THREE.Mesh(atomGeo, mat);
+            atom.position.copy(el.pos);
+            atom.userData = { id: el.z, type: el.type };
+            group.add(atom);
+            clickableObjects.push(atom);
+
+            // 文字（距離固定）
+            const label = makeLabel(symbols[el.z] || String(el.z));
+            // 原子の少し右上に配置したいが、sizeAttenuation:falseの場合は
+            // ピクセル単位のズレになるため、単純に座標を同じにするのが無難
+            label.position.copy(el.pos); 
+            // 少しだけY軸をずらす（画面上で重なりすぎないように）
+            label.center.set(0.5, -0.5); 
+            group.add(label);
         });
 
-        scene.add(group);
-        scene.add(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 200, 8), new THREE.MeshBasicMaterial({color:0x444444})));
+        // 5-2. 螺旋ライン（縦軸の代わり）
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(spiralPoints);
+        const lineMat = new THREE.LineBasicMaterial({ color: 0x444444, opacity: 0.5, transparent: true });
+        scene.add(new THREE.Line(lineGeo, lineMat));
 
-        // ★改善点3：クリック判定ロジック
+        scene.add(group);
+
+        // 6. タップ判定
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        function onInteraction(event) {
-            event.preventDefault();
-            let clientX, clientY;
-            
-            // タッチかマウスかを判定
-            if (event.changedTouches) {
-                clientX = event.changedTouches[0].clientX;
-                clientY = event.changedTouches[0].clientY;
-            } else {
-                clientX = event.clientX;
-                clientY = event.clientY;
-            }
-
-            // 座標変換
-            mouse.x = (clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
-
+        function checkIntersects(x, y) {
+            mouse.x = (x / window.innerWidth) * 2 - 1;
+            mouse.y = -(y / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(clickableObjects);
-
             if (intersects.length > 0) {
                 const data = intersects[0].object.userData;
-                // 詳細エリアの更新
-                const infoText = `No.${data.id} ${data.name}`;
-                const typeText = `[${data.type}]`;
-                document.getElementById('selected-atom').innerHTML = `${infoText}<br><span style="font-size:12px;color:#ccc">${typeText}</span>`;
-                
-                // 選択した原子を少し光らせる演出（一時的）
-                intersects[0].object.material.emissive.setHex(0xffffff);
-                setTimeout(() => {
-                    intersects[0].object.material.emissive.setHex(data.id > 118 ? 0xff00ff : 
-                        (data.type==="s-block"?0xff4444 : data.type==="p-block"?0xffff44 : data.type==="d-block"?0x4444ff : 0x44ff44));
-                }, 300);
+                const sym = symbols[data.id] || "";
+                document.getElementById('status').innerText = `No.${data.id} ${sym} [${data.type}-block]`;
+                document.getElementById('status').style.color = "#fff";
             }
         }
 
-        window.addEventListener('mousedown', onInteraction, false);
-        window.addEventListener('touchstart', onInteraction, {passive: false});
+        window.addEventListener('touchstart', (e) => {
+            // e.preventDefault(); // スクロール阻害しないようコメントアウト調整
+            if(e.touches.length === 1) {
+                checkIntersects(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, {passive: false});
+        
+        window.addEventListener('click', (e) => {
+            checkIntersects(e.clientX, e.clientY);
+        });
 
+        // 7. アニメーション
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
         }
         animate();
-        
+
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth/window.innerHeight;
             camera.updateProjectionMatrix();
