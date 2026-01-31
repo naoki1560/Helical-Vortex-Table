@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -7,7 +7,6 @@
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; color: #fff; font-family: sans-serif; }
         
-        /* インターフェース */
         #info {
             position: absolute; top: 0; left: 0; width: 100%;
             pointer-events: none; z-index: 10; padding: 10px;
@@ -49,17 +48,15 @@
     <script>
         const symbols = ["","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"];
         
-        // シーン設定
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
-        camera.position.set(0, 20, 150); // カメラ位置も少し低めに調整
+        camera.position.set(0, 20, 150);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // 操作設定（キビキビ動くまま）
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; 
         controls.dampingFactor = 0.15;
@@ -85,13 +82,10 @@
             else if ((z >= 57 && z <= 71) || (z >= 89 && z <= 103)) { color = colors.f; type="f"; }
             else if (z > 118) { color = colors.future; type="Future"; }
 
-            // ★修正ポイント：縦の長さの計算
             const maxR = 60;
             const radius = maxR - (z * 0.35);
             const theta = z * 0.55;
-            
-            // ここを変更：0.9倍だったのを0.5倍にして圧縮
-            const y = -z * 0.5 + 30; 
+            const y = -z * 0.5 + 30;
             
             const x = radius * Math.cos(theta);
             const z_pos = radius * Math.sin(theta);
@@ -139,7 +133,6 @@
         scene.add(new THREE.Line(lineGeo, lineMat));
         scene.add(group);
 
-        // iPad用クリック判定（前回同様）
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         let touchStartX = 0, touchStartY = 0;
