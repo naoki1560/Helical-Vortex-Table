@@ -1,169 +1,66 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>Helical Vortex Table</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; color: #fff; font-family: sans-serif; }
-        #info {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(0, 0, 0, 0.8); padding: 10px;
-            border: 1px solid #444; pointer-events: none;
-            z-index: 10;
-        }
-        h1 { margin: 0; font-size: 18px; color: #00ffff; letter-spacing: 1px; }
-        p { margin: 5px 0 0; font-size: 12px; color: #ccc; }
-        #tooltip {
-            position: absolute; pointer-events: none;
-            background: rgba(0, 255, 255, 0.9); color: #000;
-            padding: 5px; border-radius: 4px; font-weight: bold;
-            display: none; transform: translate(15px, 15px);
-            box-shadow: 0 0 10px rgba(0,255,255,0.5);
-            z-index: 20;
-        }
+        body { margin: 0; background-color: #000; overflow: hidden; color: white; font-family: sans-serif; }
+        #info { position: absolute; top: 10px; left: 10px; z-index: 100; pointer-events: none; }
+        h1 { margin: 0; font-size: 1.2rem; color: #0ff; }
+        p { margin: 0; font-size: 0.8rem; color: #ccc; }
     </style>
 </head>
 <body>
     <div id="info">
         <h1>Helical Vortex Table</h1>
-        <p>A 3D visualization of the periodic table based on a helical vortex model.</p>
-        <p style="margin-top:8px;">Drag to Rotate | Scroll to Zoom</p>
-        <p style="color: #ff00ff;">Purple: Future Elements (119-126)</p>
+        <p>System Online. Loading...</p>
     </div>
-    <div id="tooltip"></div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script>
-        // --- Scene Setup ---
+        // Set up scene
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.002);
-
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
         camera.position.set(0, 60, 120);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({antialias:true});
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
-
+        
+        // Controls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
         controls.autoRotate = true;
-        controls.autoRotateSpeed = 1.0;
 
-        const ambientLight = new THREE.AmbientLight(0x404040);
-        scene.add(ambientLight);
-        const pointLight = new THREE.PointLight(0xffffff, 1.5, 0);
-        pointLight.position.set(0, 50, 0);
-        scene.add(pointLight);
+        // Light
+        scene.add(new THREE.AmbientLight(0x404040));
+        const light = new THREE.PointLight(0xffffff, 1.5);
+        light.position.set(0, 50, 0);
+        scene.add(light);
 
-        // --- Element Generation ---
-        const elements = [];
-        const colors = { s: 0xff4444, p: 0xffff44, d: 0x4444ff, f: 0x44ff44, unknown: 0xaaaaaa };
-
-        for (let z = 1; z <= 126; z++) {
-            let period = 1;
-            if (z > 2) period = 2;
-            if (z > 10) period = 3;
-            if (z > 18) period = 4;
-            if (z > 36) period = 5;
-            if (z > 54) period = 6;
-            if (z > 86) period = 7;
-            if (z > 118) period = 8; 
-
-            let color = colors.d;
-            if ([1,2,3,4,11,12,19,20,37,38,55,56,87,88,119,120].includes(z)) color = colors.s;
-            else if (z > 118) color = 0xff00ff; 
-
-            elements.push({ z: z, period: period, color: color });
-        }
-
+        // Atoms
         const geometry = new THREE.SphereGeometry(1.5, 16, 16);
-        const atomGroup = new THREE.Group();
+        const group = new THREE.Group();
+        const colors = [0xff4444, 0xffff44, 0x4444ff, 0x44ff44];
+        
+        for(let i=1; i<=126; i++) {
+            const mat = new THREE.MeshPhongMaterial({color: colors[i%4]});
+            const mesh = new THREE.Mesh(geometry, mat);
+            const r = 60 - (i*0.3);
+            const theta = i * 0.5;
+            mesh.position.set(r*Math.cos(theta), -i*1.2, r*Math.sin(theta));
+            group.add(mesh);
+        }
+        scene.add(group);
 
-        elements.forEach(el => {
-            const maxR = 60;
-            const radius = maxR - (el.z * 0.3); 
-            const height = -el.z * 1.2;
-            const theta = el.z * 0.5; 
-
-            const x = radius * Math.cos(theta);
-            const z_pos = radius * Math.sin(theta);
-            const y = height;
-
-            const material = new THREE.MeshPhongMaterial({ 
-                color: el.color, 
-                emissive: el.color,
-                emissiveIntensity: 0.3
-            });
-            
-            const atom = new THREE.Mesh(geometry, material);
-            atom.position.set(x, y, z_pos);
-            atom.userData = { id: el.z, period: el.period };
-            atomGroup.add(atom);
-
-            const lineGeo = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(x, y, z_pos),
-                new THREE.Vector3(0, y - 20, 0)
-            ]);
-            const lineMat = new THREE.LineBasicMaterial({ color: 0x333333, transparent: true, opacity: 0.3 });
-            scene.add(new THREE.Line(lineGeo, lineMat));
-        });
-
-        scene.add(atomGroup);
-
-        // Core Singularity
-        const coreGeo = new THREE.IcosahedronGeometry(2, 0);
-        const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
-        const core = new THREE.Mesh(coreGeo, coreMat);
-        core.position.set(0, -160, 0);
-        scene.add(core);
-
-        // --- Animation & Interaction ---
+        // Animation
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
-            const time = Date.now() * 0.002;
-            atomGroup.children.forEach(mesh => {
-                if (mesh.userData.id >= 119) {
-                    mesh.scale.setScalar(1 + Math.sin(time) * 0.3);
-                }
-            });
-            core.rotation.y -= 0.02;
             renderer.render(scene, camera);
         }
         animate();
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        const tooltip = document.getElementById('tooltip');
-
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(atomGroup.children);
-            if (intersects.length > 0) {
-                const data = intersects[0].object.userData;
-                tooltip.style.display = 'block';
-                tooltip.style.left = event.clientX + 'px';
-                tooltip.style.top = event.clientY + 'px';
-                tooltip.innerHTML = `No.${data.id} (Period ${data.period})`;
-                document.body.style.cursor = 'pointer';
-            } else {
-                tooltip.style.display = 'none';
-                document.body.style.cursor = 'default';
-            }
-        });
+        // Update text
+        document.querySelector("#info p").innerText = "Drag to Rotate | Scroll to Zoom";
     </script>
 </body>
 </html>
