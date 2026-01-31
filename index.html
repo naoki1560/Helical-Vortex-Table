@@ -15,9 +15,11 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
         }
         h1 { margin: 0; font-size: 16px; color: #00ffff; display: inline-block; margin-right: 15px; }
-        #status { font-size: 14px; color: #ff00ff; font-weight: bold; }
+        #status { 
+            font-size: 16px; color: #ff00ff; font-weight: bold; 
+            background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px;
+        }
         
-        /* 凡例（邪魔にならないよう下部に配置） */
         #legend {
             position: absolute; bottom: 10px; right: 10px;
             background: rgba(0, 0, 0, 0.6); padding: 8px;
@@ -45,37 +47,35 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
-        // 元素データ定義
         const symbols = ["","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"];
         
-        // 1. 基本セットアップ
+        // シーン設定
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
-        camera.position.set(0, 0, 180); // 正面から全体が見える位置
+        camera.position.set(0, 20, 150); // カメラ位置も少し低めに調整
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // 2. 操作設定（キビキビ動く設定）
+        // 操作設定（キビキビ動くまま）
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; 
-        controls.dampingFactor = 0.15; // 摩擦を減らしてキビキビさせる
-        controls.rotateSpeed = 1.5;    // 回転速度アップ
-        controls.panSpeed = 1.8;       // 平行移動速度アップ
-        controls.screenSpacePanning = true; // 上下左右に自由に動かせる
+        controls.dampingFactor = 0.15;
+        controls.rotateSpeed = 1.5;
+        controls.panSpeed = 1.8;
+        controls.screenSpacePanning = true;
 
-        // 3. ライティング
         scene.add(new THREE.AmbientLight(0xaaaaaa));
         const light = new THREE.DirectionalLight(0xffffff, 1);
         light.position.set(10, 50, 50);
         scene.add(light);
 
-        // 4. データ構築
         const elements = [];
         const colors = { s: 0xff4444, p: 0xffff44, d: 0x4444ff, f: 0x44ff44, future: 0xff00ff };
         const clickableObjects = [];
-        const spiralPoints = []; // 螺旋ライン用
+        const spiralPoints = [];
 
         for (let z = 1; z <= 126; z++) {
             let color = colors.d;
@@ -85,11 +85,14 @@
             else if ((z >= 57 && z <= 71) || (z >= 89 && z <= 103)) { color = colors.f; type="f"; }
             else if (z > 118) { color = colors.future; type="Future"; }
 
-            // 座標計算
+            // ★修正ポイント：縦の長さの計算
             const maxR = 60;
             const radius = maxR - (z * 0.35);
-            const theta = z * 0.55; // 回転具合
-            const y = -z * 0.9 + 50; // 高さ調整
+            const theta = z * 0.55;
+            
+            // ここを変更：0.9倍だったのを0.5倍にして圧縮
+            const y = -z * 0.5 + 30; 
+            
             const x = radius * Math.cos(theta);
             const z_pos = radius * Math.sin(theta);
 
@@ -97,11 +100,9 @@
             spiralPoints.push(new THREE.Vector3(x, y, z_pos));
         }
 
-        // 5. 描画
         const atomGeo = new THREE.SphereGeometry(1.5, 12, 12);
         const group = new THREE.Group();
 
-        // 5-1. 文字スプライト作成（サイズ固定ロジック）
         function makeLabel(text) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -113,19 +114,13 @@
             ctx.fillText(text, 32, 32);
             
             const texture = new THREE.CanvasTexture(canvas);
-            const mat = new THREE.SpriteMaterial({ 
-                map: texture, 
-                sizeAttenuation: false, // ★ここが重要：距離に関係なく一定サイズ
-                depthTest: false        // 常に手前に表示
-            });
+            const mat = new THREE.SpriteMaterial({ map: texture, sizeAttenuation: false, depthTest: false });
             const sprite = new THREE.Sprite(mat);
-            // 画面上のサイズ調整（0.03くらいが適正）
             sprite.scale.set(0.025, 0.025, 1); 
             return sprite;
         }
 
         elements.forEach(el => {
-            // 原子
             const mat = new THREE.MeshPhongMaterial({ color: el.color });
             const atom = new THREE.Mesh(atomGeo, mat);
             atom.position.copy(el.pos);
@@ -133,26 +128,42 @@
             group.add(atom);
             clickableObjects.push(atom);
 
-            // 文字（距離固定）
             const label = makeLabel(symbols[el.z] || String(el.z));
-            // 原子の少し右上に配置したいが、sizeAttenuation:falseの場合は
-            // ピクセル単位のズレになるため、単純に座標を同じにするのが無難
             label.position.copy(el.pos); 
-            // 少しだけY軸をずらす（画面上で重なりすぎないように）
             label.center.set(0.5, -0.5); 
             group.add(label);
         });
 
-        // 5-2. 螺旋ライン（縦軸の代わり）
         const lineGeo = new THREE.BufferGeometry().setFromPoints(spiralPoints);
         const lineMat = new THREE.LineBasicMaterial({ color: 0x444444, opacity: 0.5, transparent: true });
         scene.add(new THREE.Line(lineGeo, lineMat));
-
         scene.add(group);
 
-        // 6. タップ判定
+        // iPad用クリック判定（前回同様）
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
+        let touchStartX = 0, touchStartY = 0;
+
+        renderer.domElement.addEventListener('touchstart', (e) => {
+            if(e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }
+        }, {passive: false});
+
+        renderer.domElement.addEventListener('touchend', (e) => {
+            if(e.changedTouches.length === 1) {
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                const dy = e.changedTouches[0].clientY - touchStartY;
+                if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+                    checkIntersects(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                }
+            }
+        });
+
+        renderer.domElement.addEventListener('click', (e) => {
+            checkIntersects(e.clientX, e.clientY);
+        });
 
         function checkIntersects(x, y) {
             mouse.x = (x / window.innerWidth) * 2 - 1;
@@ -162,23 +173,14 @@
             if (intersects.length > 0) {
                 const data = intersects[0].object.userData;
                 const sym = symbols[data.id] || "";
-                document.getElementById('status').innerText = `No.${data.id} ${sym} [${data.type}-block]`;
-                document.getElementById('status').style.color = "#fff";
+                const statusDiv = document.getElementById('status');
+                statusDiv.innerHTML = `No.${data.id} <span style="font-size:1.2em; color:#fff;">${sym}</span> [${data.type}-block]`;
+                const originalColor = intersects[0].object.material.color.getHex();
+                intersects[0].object.material.emissive.setHex(0xffffff);
+                setTimeout(() => { intersects[0].object.material.emissive.setHex(0x000000); }, 200);
             }
         }
 
-        window.addEventListener('touchstart', (e) => {
-            // e.preventDefault(); // スクロール阻害しないようコメントアウト調整
-            if(e.touches.length === 1) {
-                checkIntersects(e.touches[0].clientX, e.touches[0].clientY);
-            }
-        }, {passive: false});
-        
-        window.addEventListener('click', (e) => {
-            checkIntersects(e.clientX, e.clientY);
-        });
-
-        // 7. アニメーション
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
