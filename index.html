@@ -43,7 +43,7 @@
     </div>
 
     <div id="btn-container">
-        <button id="view-btn" class="hud-btn">VIEW: DYNAMIC</button>
+        <button id="view-btn" class="hud-btn">VIEW: DIAGRAM (2D)</button>
         <button id="theory-btn" class="hud-btn">THEORY</button>
     </div>
 
@@ -52,12 +52,12 @@
             <span id="close-btn">&times;</span>
             <h2>Why Helical Vortex?</h2>
             <div class="theory-text">
-                <p><strong>1. Unbroken Continuity</strong><br>
-                Traditional tables fragment the natural sequence. This model visualizes atomic number (Z) as a single, <strong>continuous helical flow</strong>, reflecting the true nature of matter's progression.</p>
-                <p><strong>2. Perfect Group Alignment</strong><br>
-                Switch to the <strong>Dynamic View</strong>. Elements of the same chemical group (like Alkali metals) align precisely in radial spokes, revealing the underlying cyclical order.</p>
-                <p><strong>3. Natural Integration</strong><br>
-                The f-block (Lanthanides/Actinides) is logically integrated between the s and d blocks, not exiled to a footnote, seamlessly completing the 32-column structure.</p>
+                <p><strong>1. The Expanded Spiral</strong><br>
+                This diagram reveals the true "growth" of matter. By expanding the spiral outward, you can clearly trace the continuous path of atomic numbers from the center to the edge.</p>
+                <p><strong>2. Radial Alignment</strong><br>
+                Elements of the same group align in perfect radial lines (spokes). This shows that periodicity is a repeating cycle within an expanding universe.</p>
+                <p><strong>3. The Full Picture</strong><br>
+                The 32-column structure is fully visible, integrating the f-block naturally into the spiral flow.</p>
             </div>
             <div style="font-size:14px; color:#666; text-align:right; margin-top:20px;">Designed by Naoki Kiryu</div>
         </div>
@@ -72,8 +72,8 @@
         
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
-        // 初期位置：少し引いた斜め上
-        const defaultPos = {x:0, y:150, z:400};
+        // デフォルト: 斜めからの俯瞰
+        const defaultPos = {x:0, y:300, z:500};
         camera.position.set(defaultPos.x, defaultPos.y, defaultPos.z);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -83,15 +83,11 @@
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; controls.dampingFactor = 0.1; controls.rotateSpeed = 1.2;
-        controls.minDistance = 100; controls.maxDistance = 1500;
 
         scene.add(new THREE.AmbientLight(0xaaaaaa, 0.8));
         const light = new THREE.DirectionalLight(0xffffff, 0.8);
         light.position.set(100, 200, 100);
         scene.add(light);
-        const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
-        light2.position.set(-100, -200, -100);
-        scene.add(light2);
 
         function getColumnIndex(z) {
             if (z === 1) return 0; if (z === 2) return 31;
@@ -104,6 +100,7 @@
         const elements = [];
         const colors = { s: 0xff4444, p: 0xffff44, d: 0x4444ff, f: 0x44ff44, future: 0xff00ff };
         const clickableObjects = [];
+        const spiralPoints = [];
 
         for (let z = 1; z <= 118; z++) {
             let color = colors.d, type = "d";
@@ -119,32 +116,37 @@
             if (z > 36) period = 5; if (z > 54) period = 6; if (z > 86) period = 7;
 
             const theta = -colIndex * angleStep - (Math.PI/2);
-            // ★修正：全体を広げるため、半径の基本値と係数を大きく設定
-            const radius = 100 + (period * 12); 
-            // ★修正：高さの差も少し広げて見やすく
-            const y = -z * 1.2 + 80; 
+            
+            // ★ここが修正点：内側からグワッと広げる
+            // 以前は period * 12 くらいだったのを、period * 40 に拡大。
+            // これで周回ごとの隙間がガッツリ空いて、真上からでも重ならない。
+            const radius = 60 + (period * 45); 
+            
+            const y = -z * 1.5 + 100; // 高さも調整
             
             const x = radius * Math.cos(theta);
             const z_pos = radius * Math.sin(theta);
-            elements.push({ z: z, color: color, type: type, pos: new THREE.Vector3(x, y, z_pos) });
+            
+            const pos = new THREE.Vector3(x, y, z_pos);
+            elements.push({ z: z, color: color, type: type, pos: pos });
+            spiralPoints.push(pos);
         }
 
-        // ★修正：全体が広がったので、球体と文字も少し大きく
-        const atomGeo = new THREE.SphereGeometry(2.5, 16, 16);
+        const atomGeo = new THREE.SphereGeometry(3.0, 16, 16); // 球体サイズ調整
         const group = new THREE.Group();
 
         function makeLabel(text) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 128; canvas.height = 128; // キャンバス解像度UP
+            canvas.width = 128; canvas.height = 128;
             ctx.fillStyle = "white";
-            ctx.font = "bold 80px Arial"; // フォントサイズUP
+            ctx.font = "bold 80px Arial";
             ctx.textAlign = "center"; ctx.textBaseline = "middle";
             ctx.fillText(text, 64, 64);
             const texture = new THREE.CanvasTexture(canvas);
             const mat = new THREE.SpriteMaterial({ map: texture, sizeAttenuation: false, depthTest: false });
             const sprite = new THREE.Sprite(mat);
-            sprite.scale.set(0.04, 0.04, 1); // スケール調整
+            sprite.scale.set(0.05, 0.05, 1);
             return sprite;
         }
 
@@ -158,31 +160,39 @@
             const label = makeLabel(symbols[el.z] || String(el.z));
             label.position.copy(el.pos); label.center.set(0.5, -0.5); group.add(label);
         });
+
+        // ★螺旋のラインを追加：これが「関連図」としての視認性を上げる
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(spiralPoints);
+        const lineMat = new THREE.LineBasicMaterial({ color: 0x666666, opacity: 0.6, transparent: true, linewidth: 2 });
+        scene.add(new THREE.Line(lineGeo, lineMat));
+
         scene.add(group);
 
-        // ビュー制御（ダイナミック視点）
+        // ビュー制御
         const viewBtn = document.getElementById('view-btn');
         let isTopView = false;
         viewBtn.onclick = () => {
             isTopView = !isTopView;
-            viewBtn.innerText = isTopView ? "VIEW: RESET" : "VIEW: DYNAMIC";
+            viewBtn.innerText = isTopView ? "VIEW: RESET" : "VIEW: DIAGRAM (2D)";
             viewBtn.classList.toggle('active');
             
-            // ★修正：真上(0,Y,0)ではなく、斜め上空手前(0, Y, Z)に移動
-            const targetPos = isTopView ? {x:0, y:450, z:250} : defaultPos;
+            // ★修正：完全に真上からの視点 (X=0, Z=0)
+            // 距離(Y)を十分にとって、全体を収める
+            const targetPos = isTopView ? {x:0, y:800, z:0} : defaultPos;
 
             new TWEEN.Tween(camera.position)
-                .to(targetPos, 1200) // 少しゆっくりリッチに
+                .to(targetPos, 1200)
                 .easing(TWEEN.Easing.Cubic.InOut)
                 .onUpdate(() => controls.update())
                 .start();
                 
-            // 固定モードでも少しだけ動かせるようにして「覗き込む」感を出す
             if(isTopView) {
                 controls.enableRotate = false; 
-                // lookAtは原点のままでOK。斜め上から見下ろす形になる。
+                // 真上から見下ろした状態で固定
+                new TWEEN.Tween(camera.up).to({x:0, y:0, z:-1}, 1000).start(); // カメラの向き調整
             } else {
                 controls.enableRotate = true;
+                new TWEEN.Tween(camera.up).to({x:0, y:1, z:0}, 1000).start();
             }
         };
 
