@@ -12,28 +12,27 @@
             pointer-events: none; z-index: 10; padding: 15px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
         }
-        h1 { margin: 0; font-size: 18px; color: #00ffff; letter-spacing: 1px; text-shadow: 0 0 5px #00ffff; }
-        #status { font-size: 14px; color: #ff00ff; font-weight: bold; margin-top: 5px; display:block; }
+        h1 { margin: 0; font-size: 20px; color: #00ffff; letter-spacing: 1px; text-shadow: 0 0 5px #00ffff; }
+        #status { font-size: 15px; color: #ff00ff; font-weight: bold; margin-top: 5px; display:block; }
         
-        /* ボタン群 */
         #btn-container {
-            position: absolute; bottom: 20px; right: 20px;
-            display: flex; gap: 10px; z-index: 20;
+            position: absolute; bottom: 30px; right: 30px;
+            display: flex; gap: 15px; z-index: 20;
         }
         .hud-btn {
-            background: rgba(0, 255, 255, 0.1); border: 1px solid #00ffff;
-            color: #00ffff; padding: 10px 15px; border-radius: 30px;
-            font-size: 12px; cursor: pointer; backdrop-filter: blur(5px);
-            transition: all 0.3s; font-weight: bold;
+            background: rgba(0, 255, 255, 0.15); border: 2px solid #00ffff;
+            color: #00ffff; padding: 12px 20px; border-radius: 30px;
+            font-size: 14px; cursor: pointer; backdrop-filter: blur(5px);
+            transition: all 0.3s; font-weight: bold; letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
         }
-        .hud-btn:active, .hud-btn.active { background: #00ffff; color: #000; box-shadow: 0 0 10px #00ffff; }
+        .hud-btn:active, .hud-btn.active { background: #00ffff; color: #000; box-shadow: 0 0 20px #00ffff; }
 
-        /* モーダル */
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 30; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        #modal-content { background: #111; border: 1px solid #333; padding: 25px; max-width: 500px; width: 100%; border-radius: 8px; position: relative; box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); }
-        #close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; color: #666; cursor: pointer; }
-        h2 { color: #00ffff; margin-top: 0; font-size: 18px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .theory-text { font-size: 14px; line-height: 1.6; color: #ccc; margin-bottom: 15px; }
+        #modal-content { background: #111; border: 1px solid #333; padding: 30px; max-width: 600px; width: 100%; border-radius: 12px; position: relative; box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); }
+        #close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: #666; cursor: pointer; }
+        h2 { color: #00ffff; margin-top: 0; font-size: 22px; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;}
+        .theory-text { font-size: 16px; line-height: 1.8; color: #ccc; margin-bottom: 20px; }
         strong { color: #fff; }
     </style>
 </head>
@@ -44,7 +43,7 @@
     </div>
 
     <div id="btn-container">
-        <button id="view-btn" class="hud-btn">VIEW: 3D</button>
+        <button id="view-btn" class="hud-btn">VIEW: DYNAMIC</button>
         <button id="theory-btn" class="hud-btn">THEORY</button>
     </div>
 
@@ -53,12 +52,14 @@
             <span id="close-btn">&times;</span>
             <h2>Why Helical Vortex?</h2>
             <div class="theory-text">
-                <p><strong>1. Group Alignment (The "Spokes")</strong><br>
-                Unlike simple spirals, this model aligns elements by their <strong>chemical group</strong>. Elements with similar properties (e.g., Alkali metals) align perfectly in radial spokes.</p>
-                <p><strong>2. 32-Column Integration</strong><br>
-                This uses the 32-column extended format mapped to a circle. The f-block is naturally integrated between s and d blocks, showing the true electron filling order.</p>
+                <p><strong>1. Unbroken Continuity</strong><br>
+                Traditional tables fragment the natural sequence. This model visualizes atomic number (Z) as a single, <strong>continuous helical flow</strong>, reflecting the true nature of matter's progression.</p>
+                <p><strong>2. Perfect Group Alignment</strong><br>
+                Switch to the <strong>Dynamic View</strong>. Elements of the same chemical group (like Alkali metals) align precisely in radial spokes, revealing the underlying cyclical order.</p>
+                <p><strong>3. Natural Integration</strong><br>
+                The f-block (Lanthanides/Actinides) is logically integrated between the s and d blocks, not exiled to a footnote, seamlessly completing the 32-column structure.</p>
             </div>
-            <div style="font-size:12px; color:#666; text-align:right;">Designed by Naoki Kiryu</div>
+            <div style="font-size:14px; color:#666; text-align:right; margin-top:20px;">Designed by Naoki Kiryu</div>
         </div>
     </div>
 
@@ -70,8 +71,9 @@
         const symbols = ["","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"];
         
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
-        const defaultPos = {x:0, y:60, z:160};
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
+        // 初期位置：少し引いた斜め上
+        const defaultPos = {x:0, y:150, z:400};
         camera.position.set(defaultPos.x, defaultPos.y, defaultPos.z);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -80,45 +82,22 @@
         document.body.appendChild(renderer.domElement);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; controls.dampingFactor = 0.15; controls.rotateSpeed = 1.5;
+        controls.enableDamping = true; controls.dampingFactor = 0.1; controls.rotateSpeed = 1.2;
+        controls.minDistance = 100; controls.maxDistance = 1500;
 
-        scene.add(new THREE.AmbientLight(0xaaaaaa));
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(10, 50, 50);
+        scene.add(new THREE.AmbientLight(0xaaaaaa, 0.8));
+        const light = new THREE.DirectionalLight(0xffffff, 0.8);
+        light.position.set(100, 200, 100);
         scene.add(light);
+        const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+        light2.position.set(-100, -200, -100);
+        scene.add(light2);
 
-        // ★重要：32列拡張周期表に基づく列位置の計算 (0〜31)
         function getColumnIndex(z) {
-            if (z === 1) return 0;  // H (Group 1)
-            if (z === 2) return 31; // He (Group 18 -> Col 32)
-            
-            // Period 2 (Li-Ne) & 3 (Na-Ar)
-            if (z >= 3 && z <= 18) {
-                const offset = (z <= 10) ? 2 : 10; 
-                let local = z - offset; // 1..8
-                if (local <= 2) return local - 1; // s-block
-                return local + 23; // p-block shifts to end
-            }
-            
-            // Period 4 (K-Kr) & 5 (Rb-Xe) : 18 elements
-            if (z >= 19 && z <= 54) {
-                const offset = (z <= 36) ? 18 : 36;
-                let local = z - offset; // 1..18
-                if (local <= 2) return local - 1; // s
-                if (local <= 12) return local + 13; // d
-                return local + 13; // p
-            }
-
-            // Period 6 (Cs-Rn) & 7 (Fr-Og) : 32 elements (s, f, d, p)
-            if (z >= 55) {
-                const offset = (z <= 86) ? 54 : 86;
-                let local = z - offset; // 1..32
-                // 1-2: s (Col 0-1)
-                // 3-16: f (Col 2-15)
-                // 17-26: d (Col 16-25)
-                // 27-32: p (Col 26-31)
-                return local - 1; 
-            }
+            if (z === 1) return 0; if (z === 2) return 31;
+            if (z >= 3 && z <= 18) { const o = (z <= 10) ? 2 : 10; let l = z - o; return (l <= 2) ? l - 1 : l + 23; }
+            if (z >= 19 && z <= 54) { const o = (z <= 36) ? 18 : 36; let l = z - o; if (l <= 2) return l - 1; if (l <= 12) return l + 13; return l + 13; }
+            if (z >= 55) { const o = (z <= 86) ? 54 : 86; let l = z - o; return l - 1; }
             return 0;
         }
 
@@ -127,99 +106,86 @@
         const clickableObjects = [];
 
         for (let z = 1; z <= 118; z++) {
-            let color = colors.d;
-            let type = "d";
-            const colIndex = getColumnIndex(z); // 0 to 31
-
-            // 色判定
+            let color = colors.d, type = "d";
+            const colIndex = getColumnIndex(z);
             if (colIndex <= 1) { color = colors.s; type="s"; }
             else if (colIndex >= 2 && colIndex <= 15) { color = colors.f; type="f"; }
             else if (colIndex >= 16 && colIndex <= 25) { color = colors.d; type="d"; }
             else { color = colors.p; type="p"; }
 
-            // ★角度の計算：番号順ではなく「列」で決める
-            // 32分割した円周上の位置 + 少しのズレを防ぐ補正
             const angleStep = (Math.PI * 2) / 32;
-            // 少しずつ高さを変えるために回転数を加味したいが、
-            // 「縦の整列」を優先するため、同じ列は同じ角度にする。
-            // ただし、完全に同じだと重なるので、高さ(y)で分ける。
-            
-            // 螺旋の回転数（周期）を計算
             let period = 1;
-            if (z > 2) period = 2;
-            if (z > 10) period = 3;
-            if (z > 18) period = 4;
-            if (z > 36) period = 5;
-            if (z > 54) period = 6;
-            if (z > 86) period = 7;
+            if (z > 2) period = 2; if (z > 10) period = 3; if (z > 18) period = 4;
+            if (z > 36) period = 5; if (z > 54) period = 6; if (z > 86) period = 7;
 
-            // 角度は「列番号」に完全依存させる
-            const theta = -colIndex * angleStep - (Math.PI/2); // -90度してHを上に
-            
-            const maxR = 60;
-            // 半径は周期ごとに広げるか、一定にするか。
-            // ここでは「整列」を見せるため、半径は周期ごとに少し変える
-            const radius = 30 + (period * 5); 
-            
-            const y = -z * 0.8 + 50; 
+            const theta = -colIndex * angleStep - (Math.PI/2);
+            // ★修正：全体を広げるため、半径の基本値と係数を大きく設定
+            const radius = 100 + (period * 12); 
+            // ★修正：高さの差も少し広げて見やすく
+            const y = -z * 1.2 + 80; 
             
             const x = radius * Math.cos(theta);
             const z_pos = radius * Math.sin(theta);
-
             elements.push({ z: z, color: color, type: type, pos: new THREE.Vector3(x, y, z_pos) });
         }
 
-        const atomGeo = new THREE.SphereGeometry(1.5, 12, 12);
+        // ★修正：全体が広がったので、球体と文字も少し大きく
+        const atomGeo = new THREE.SphereGeometry(2.5, 16, 16);
         const group = new THREE.Group();
 
         function makeLabel(text) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 64; canvas.height = 64;
+            canvas.width = 128; canvas.height = 128; // キャンバス解像度UP
             ctx.fillStyle = "white";
-            ctx.font = "bold 48px Arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(text, 32, 32);
+            ctx.font = "bold 80px Arial"; // フォントサイズUP
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(text, 64, 64);
             const texture = new THREE.CanvasTexture(canvas);
             const mat = new THREE.SpriteMaterial({ map: texture, sizeAttenuation: false, depthTest: false });
             const sprite = new THREE.Sprite(mat);
-            sprite.scale.set(0.025, 0.025, 1); 
+            sprite.scale.set(0.04, 0.04, 1); // スケール調整
             return sprite;
         }
 
         elements.forEach(el => {
-            const mat = new THREE.MeshPhongMaterial({ color: el.color });
+            const mat = new THREE.MeshPhongMaterial({ color: el.color, shininess: 80 });
             const atom = new THREE.Mesh(atomGeo, mat);
             atom.position.copy(el.pos);
             atom.userData = { id: el.z, type: el.type };
             group.add(atom);
             clickableObjects.push(atom);
             const label = makeLabel(symbols[el.z] || String(el.z));
-            label.position.copy(el.pos); 
-            label.center.set(0.5, -0.5); 
-            group.add(label);
+            label.position.copy(el.pos); label.center.set(0.5, -0.5); group.add(label);
         });
-
-        // 縦のライン（族のつながり）を可視化する線
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(elements.map(e=>e.pos));
-        // ただの線だとぐちゃぐちゃになるので、今回は「点」の整列美を見せるため線はなし、あるいは薄く
-        
         scene.add(group);
 
-        // インタラクション & ビュー制御
+        // ビュー制御（ダイナミック視点）
         const viewBtn = document.getElementById('view-btn');
         let isTopView = false;
         viewBtn.onclick = () => {
             isTopView = !isTopView;
-            viewBtn.innerText = isTopView ? "VIEW: 2D" : "VIEW: 3D";
+            viewBtn.innerText = isTopView ? "VIEW: RESET" : "VIEW: DYNAMIC";
             viewBtn.classList.toggle('active');
-            const targetPos = isTopView ? {x:0, y:200, z:0} : defaultPos;
-            new TWEEN.Tween(camera.position).to(targetPos, 1000).easing(TWEEN.Easing.Cubic.Out).onUpdate(()=>controls.update()).start();
-            if(isTopView) { controls.enableRotate = false; camera.lookAt(0,0,0); } else { controls.enableRotate = true; }
+            
+            // ★修正：真上(0,Y,0)ではなく、斜め上空手前(0, Y, Z)に移動
+            const targetPos = isTopView ? {x:0, y:450, z:250} : defaultPos;
+
+            new TWEEN.Tween(camera.position)
+                .to(targetPos, 1200) // 少しゆっくりリッチに
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .onUpdate(() => controls.update())
+                .start();
+                
+            // 固定モードでも少しだけ動かせるようにして「覗き込む」感を出す
+            if(isTopView) {
+                controls.enableRotate = false; 
+                // lookAtは原点のままでOK。斜め上から見下ろす形になる。
+            } else {
+                controls.enableRotate = true;
+            }
         };
 
-        // タップ判定
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         let touchStartX=0, touchStartY=0;
@@ -235,9 +201,9 @@
             if (intersects.length > 0) {
                 const data = intersects[0].object.userData;
                 const sym = symbols[data.id] || "";
-                document.getElementById('status').innerHTML = `No.${data.id} <span style="font-size:1.2em; color:#fff;">${sym}</span> [${data.type}-block]`;
+                document.getElementById('status').innerHTML = `No.${data.id} <span style="font-size:1.3em; color:#fff;">${sym}</span> [${data.type}-block]`;
                 intersects[0].object.material.emissive.setHex(0xffffff);
-                setTimeout(() => { intersects[0].object.material.emissive.setHex(0x000000); }, 200);
+                setTimeout(() => { intersects[0].object.material.emissive.setHex(0x000000); }, 300);
             }
         }
 
